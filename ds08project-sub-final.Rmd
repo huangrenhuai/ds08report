@@ -1,0 +1,140 @@
+---
+title: "Report: ds08project"
+author: "Ren-Huai Huang"
+date: "April 25, 2015"
+output: html_document
+---
+
+## Introduction:  
+
+* The goal of the project is to predict the manner in which they did the exercise. This is the "classe" variable in the training set. 
+* More information is available from the website [here](http://groupware.les.inf.puc-rio.br/har). (see the section on the Weight Lifting Exercise Dataset). 
+
+## Download the dataset, clean up and split the data: 
+
+* The dataset pml_training contains 19622 obs. of  160 variables. pml_testing contains 20 obs. of  160 variables. both dataset has same varables in column 1 to 159 except the last column "classe"" variable has been repalced with a problem_id.  
+* By further exploring the data, it was found that there are 60 column variables in both datasets that didnot containing NA.   
+* By inspecting the coumn names we further removed the first 1-7 column variables that are not related to the activity monitors. 
+* Then the dataset pml_traing was splitting into training and testing. 
+* Furthermore, 1000 rows was sampled from the training for exploring different model fast.   
+
+```{r download and cleanup}
+# download the data
+library(RCurl); library(caret)
+pml_training <- read.csv(text = getURL("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"));
+pml_testing <- read.csv(text = getURL("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"));
+
+# explore the data in the pml_training and pml_testing. 
+dim(pml_training); # 19622 obs. of  160 variables
+dim(pml_testing);  #    20 obs. of  160 variables
+# str(pml_training, list.len = 999); # 19622 obs. of  160 variables
+table(names(pml_training) == names(pml_testing)) # the first 159 variables are same in both datasets. 
+levels(pml_training$classe); # the outcom variable called classe has 5 levels: "A" "B" "C" "D" "E".
+names(pml_testing[160]); # the variable to be predicted is called "problem_id".
+
+# clean up the column which contains NA
+naCol <- sapply(pml_testing, function(x) { sum(!is.na(x)) }) == 20 # select the column that does not containing NA in the pml_testing dataset
+pml_testing_r <- pml_testing[naCol]; pml_training_r <- pml_training[naCol];
+dim(pml_testing_r); dim(pml_training_r); # There are 60 variables/column in both datasets after clean up the data with NA. 
+
+# clean up the columns variables which are not related to the activity monitors
+names(pml_training_r)[1:7]; names(pml_testing_r)[1:7]; str(pml_testing_r)
+pml_training_r2 <- subset(pml_training_r, select = -c(1:7)); 
+pml_testing_r2  <- subset(pml_testing_r,  select = -c(1:7)); 
+
+# data split
+inTrain <- createDataPartition(y = pml_training_r2[, "classe"], p =0.6, list = F);
+training <- pml_training_r2[inTrain, ]; 
+testing  <- pml_training_r2[-inTrain,];
+
+# sample a small dataset from the training set for fast exploring diferent algorithm. 
+straining <- training[sample(1:dim(training)[1], size = 1000),]; 
+dim(straining); #the small dataset contains 1000 rows
+```
+
+
+## Exploring different classification model:
+* The outcom variable called "classe"" has 5 levels: "A" "B" "C" "D" "E". 
+* First the classical "rpart" algorithm was tried for classification. The accurary is poor;
+* Then the model was trained by "rf" method using train function in caret package without using cross valication. The prediction have signicant improvement.
+* I ended up with "rf" with a 10-fold cross validation. See the following section below. 
+
+### Model: rpart    
+```{r rpart}
+set.seed(100)
+mod_rpart <- train(classe~., data = straining, method = "rpart"); 
+Pr <- predict(mod_rpart, newdata = straining)
+# table(Pr, straining$classe)
+confusionMatrix(Pr, straining$classe)
+# the in-sample error is bad 
+```
+
+### Model: rf without cv    
+* The function trainControl can be used to specifiy the type of resampling:    
+```{r rf}
+fitControl = trainControl(method = "none"); 
+tgrid <- expand.grid(mtry= c(6)); 
+mod_rf <- train(classe ~ ., data = straining, method = "rf", trControl = fitControl, tuneGrid = tgrid); 
+summary(mod_rf); 
+classePr <- predict(mod_rf, newdata = straining);
+table(classePr, straining$classe)
+confusionMatrix(classePr, straining$classe)
+```
+
+## Build the model and explore  the model:   
+* The final model was build using "train"" function in the "caret" package.
+* "rf" method was used for the randonForest algorithm.
+* a 10-fold cross validation with repeats of 10 times was using to resampling the data. 
+* To accelerate the computation, doParallel package was using to parallel the process. 
+
+### Model: rf with cv 
+```{r rfcv}
+# initialize doParallel to do parallel automatically
+library(doParallel)
+cl <- makeCluster(detectCores())
+registerDoParallel(cl)
+
+#build the model
+fitControl = trainControl(method = "cv", number = 10, repeats = 10); 
+# mtry=function(p) max(1, floor(sqrt(p))) <- expand.grid(mtry= c(6)); 
+# system.time(mod_rfcv <- train(classe ~ ., data = training, method = "rf", trControl = fitControl, tuneGrid = tgrid, ntree=500)); 
+message("randomForest is runing. It usally take several minute...");
+system.time(mod_rfcv <- train(classe ~ ., data = training, method = "rf", trControl = fitControl, ntree=500));
+#stop the cluster
+stopCluster(cl); registerDoSEQ();
+
+# evaluate the model
+mod_rfcv;
+summary(mod_rfcv); 
+varImp(mod_rfcv); 
+```
+
+### Calculate the out of sample error. 
+* The out of sample error shows that the accurary is very high, suggesting that the modle is well built.
+* Random forest is very accurate. 
+* To avoid overfitting, cross validattion was used for resampling.
+* 
+
+```{r sampleError}
+classePr <- predict(mod_rfcv, newdata = testing);
+table(classePr, testing$classe)
+confusionMatrix(classePr, testing$classe);
+```
+
+## Predict the 20 different test cases: 
+* apply your machine learning algorithm to the 20 test cases available in the pml_testing data.  
+```{r finalProdiction}
+pml_testing_results <- predict(mod_rfcv, newdata = pml_testing);
+print(pml_testing_results);  
+```  
+
+## Submission: 
+1. Your submission should consist of a link to a Github repo with your R markdown and compiled HTML file describing your analysis. Please constrain the text of the writeup to < 2000 words and the number of figures to be less than 5. It will make it easier for the graders if you submit a repo with a gh-pages branch so the HTML page can be viewed online (and you always want to make it easy on graders :-).
+2. You should also apply your machine learning algorithm to the 20 test cases available in the test data above. Please submit your predictions in appropriate format to the programming assignment for automated grading. See the programming assignment for additional details. 
+
+* Reproducibility 
+
++ Due to security concerns with the exchange of R code, your code will not be run during the evaluation by your classmates. Please be sure that if they download the repo, they will be able to view the compiled HTML version of your analysis.
+
+## Reference: 
+[http://groupware.les.inf.puc-rio.br/har](http://groupware.les.inf.puc-rio.br/har)
