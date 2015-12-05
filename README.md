@@ -6,6 +6,9 @@ Project for practical machine learning.
 
 # "Data Science Specification". 
 
+DS Course_01: The Data Scientist’s Toolbox <https://github.com/huangrenhuai/MyFirstrepo>
+
+DS Course_02: P Programing <https://github.com/huangrenhuai/ProgrammingAssignment2>
 
 DS Course_03: Getting and Cleaning Data <https://github.com/huangrenhuai/ds03project>    
 
