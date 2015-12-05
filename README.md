@@ -4,7 +4,7 @@ Project for practical machine learning.
 # To view the report, click the link:
 
 
-# Other course in "Data Science Specification". 
+# "Data Science Specification". 
 
 
 DS Course_03: Getting and Cleaning Data <https://github.com/huangrenhuai/ds03project>    
