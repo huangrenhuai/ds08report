@@ -21,6 +21,9 @@ DS Course_06: <https://github.com/huangrenhuai/DS06_Statistical_Inference_Projec
 Assignment_01: https://huangrenhuai.github.io/DS06_Statistical_Inference_Project/ds06p3a.html
 Assignment_02: https://huangrenhuai.github.io/DS06_Statistical_Inference_Project/ds06p3b.html
 
+DS Course_07: 
+https://huangrenhuai.github.io/ds07_Regression_Models_Project/dsp1w3.html
+
 DS Course_08: Practical Machine Learning: <https://huangrenhuai.github.io/ds08report/ds08project-sub-final.html>
 
 DS Course_09: <https://github.com/huangrenhuai/stock>
