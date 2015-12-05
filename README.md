@@ -17,6 +17,10 @@ DS Course_04: Exploratory Data Analysis <https://github.com/huangrenhuai/ExData_
 DS Course_05: <https://github.com/huangrenhuai/RepData_PeerAssessment1>
 Final: <https://huangrenhuai.github.io//RepData_PeerAssessment1/PA1_template.html>
 
+DS Course_06: <https://github.com/huangrenhuai/DS06_Statistical_Inference_Project>
+Assignment_01: https://huangrenhuai.github.io/DS06_Statistical_Inference_Project/ds06p3a.html
+Assignment_02: https://huangrenhuai.github.io/DS06_Statistical_Inference_Project/ds06p3b.html
+
 DS Course_08: Practical Machine Learning: <https://huangrenhuai.github.io/ds08report/ds08project-sub-final.html>
 
 DS Course_09: <https://github.com/huangrenhuai/stock>
