@@ -12,7 +12,10 @@ DS Course_02: P Programing <https://github.com/huangrenhuai/ProgrammingAssignmen
 
 DS Course_03: Getting and Cleaning Data <https://github.com/huangrenhuai/ds03project>    
 
-DS Course_04: Exploratory Data Analysis <https://github.com/huangrenhuai/ExData_Plotting1>   
+DS Course_04: Exploratory Data Analysis <https://github.com/huangrenhuai/ExData_Plotting1> 
+
+DS Course_05: <https://github.com/huangrenhuai/RepData_PeerAssessment1>
+Final: <https://huangrenhuai.github.io//RepData_PeerAssessment1/PA1_template.html>
 
 DS Course_08: Practical Machine Learning: <https://huangrenhuai.github.io/ds08report/ds08project-sub-final.html>
 
